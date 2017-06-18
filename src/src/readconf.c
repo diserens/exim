@@ -3719,6 +3719,17 @@ if (errors_reply_to != NULL)
   {
   uschar *errmess;
   int start, end, domain;
+  
+  uschar *nah = expand_string(errors_reply_to);
+  if (nah == NULL)
+    {
+    if (!expand_string_forcedfail)
+      log_write(0, LOG_MAIN|LOG_PANIC_DIE, "failed to expand \"%s\" "
+        "(errors_reply_to): %s", errors_reply_to,
+        expand_string_message);
+    }
+  else if (nah[0] != 0) errors_reply_to = nah;
+  
   uschar *recipient = parse_extract_address(errors_reply_to, &errmess,
     &start, &end, &domain, FALSE);
 
