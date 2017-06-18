@@ -3695,7 +3695,20 @@ if (smtp_ratelimit_rcpt != NULL)
 /* The qualify domains default to the primary host name */
 
 if (qualify_domain_sender == NULL)
-  qualify_domain_sender = primary_hostname;
+  qualify_domain_sender = primary_hostname; 
+
+if (qualify_domain_sender != NULL)
+  {
+  uschar *nah = expand_string(qualify_domain_sender);
+  if (nah == NULL)
+    {
+    if (!expand_string_forcedfail)
+      log_write(0, LOG_MAIN|LOG_PANIC_DIE, "failed to expand \"%s\" "
+        "(qualify_domain_sender): %s", qualify_domain_sender,
+        expand_string_message);
+    }
+  else if (nah[0] != 0) qualify_domain_sender = nah;
+}
 if (qualify_domain_recipient == NULL)
   qualify_domain_recipient = qualify_domain_sender;
 
